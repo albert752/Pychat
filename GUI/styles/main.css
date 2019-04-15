@@ -1,30 +1,24 @@
-
-* {
-    margin: 4px;
-}
-
 box {
-    margin: 6px;
+    margin: 10px;
 }
 
 button {
-    border-style: solid;
-    border-width: 0px ;
-    border-radius: 5px;
+    margin-top: 4px;
+    margin-left: 4px;
 }
 
 button#send_button {
     margin-right: 6px;
-    margin-bottom: 6px;
 }
 
-
-
 entry#message_entry{
-    margin-left: 6px;
-    margin-bottom: 6px;
+    margin-top: 4px;
 }
 
 menubar {
+    margin-bottom: 10px;
+}
 
+menuitem {
+    margin: 0px;
 }
