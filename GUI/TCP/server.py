@@ -2,6 +2,8 @@ import socket, time
 from threading import Thread
 
 
+HEADERSIZE = 10
+
 class Server():
     def __init__(self, header_size=10, port=1234, queue_size = 5):
         self.headersize = header_size
@@ -21,20 +23,26 @@ class Server():
 if __name__ == '__main__':
 
     def _test_handler(clientsocket, header_size):
-        msg = "Welcome to the server!"
-        msg = f"{len(msg):<{header_size}}"+msg
+        while True:
+            full_msg = ''
+            new_msg = True
+            while True:
+                msg = clientsocket.recv(16)
+                if new_msg:
+                    print("new msg len:", msg[:HEADERSIZE])
+                    msglen = int(msg[:HEADERSIZE])
+                    new_msg = False
 
-        clientsocket.send(bytes(msg,"utf-8"))
-        msg = clientsocket.recv(1600)
-        print(msg.decode("utf-8"))
-        #while True:
-        #    time.sleep(3)
-        #    msg = f"The time is {time.time()}"
-        #    msg = f"{len(msg):<{header_size}}"+msg
+                print(f"full message length: {msglen}")
 
-            #print(msg)
+                full_msg += msg.decode("utf-8")
 
-            #clientsocket.send(bytes(msg,"utf-8"))
+                print(len(full_msg))
+
+                if len(full_msg) - HEADERSIZE == msglen:
+                    print("full msg recvd")
+                    print(full_msg[HEADERSIZE:])
+                    break
 
     s = Server()
     s.start(_test_handler)

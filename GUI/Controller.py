@@ -13,12 +13,11 @@ class Controller(object):
         self._model = model
         self._view = view
 
-        self._client = Client()
-        self._client.start(print)
+        self._client = Client("albert752")
+        self._client.start()
 
         self._view.connect('send', self.send)
         self._view.connect('destroy', Gtk.main_quit)
-
 
         self._view.show_all()
 
