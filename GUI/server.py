@@ -78,7 +78,7 @@ while True:
             if payload[0] == '@':
                 if payload[1:] == "list":
                     #client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
-                    send_message(client_socket, users_to_string())
+                    send_message(notified_socket, users_to_string())
                 else:
                     pass
             else:

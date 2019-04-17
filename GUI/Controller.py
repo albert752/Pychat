@@ -1,11 +1,9 @@
 import gi
 from Model import Model
-from View import View
 gi.require_version('Gtk', '3.0')
+
 from gi.repository import Gtk, GObject
 from TCP.client import Client
-from TCP.server import Server
-from gi.repository import GLib
 from codes import *
 
 
@@ -14,7 +12,7 @@ class Controller(object):
     def __init__(self, model):
         self._model = model
         self._client = None
-        self.username = "Joker"
+        self.username = ""
 
         self._model.view.connect('send', self.send)
         self._model.view.connect('destroy', Gtk.main_quit)

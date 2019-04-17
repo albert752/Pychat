@@ -32,12 +32,12 @@ class Client:
             while True:
                 try:
                     while True:
-                        #print(self.client_socket)
                         username_header = self.client_socket.recv(self.HEADER_LENGTH)
 
                         if not len(username_header):
                             print('Connection closed by the server')
                             sys.exit()
+
                         username_length = int(username_header.decode('utf-8').strip())
                         username = self.client_socket.recv(username_length).decode('utf-8')
 
@@ -48,14 +48,9 @@ class Client:
 
                 except IOError as e:
                     time.sleep(pol_rate/1000)
-                    #print("++ error ++")
-                    # This is normal on non blocking connections - when there are no incoming data error is going to be raised
-                    # Some operating systems will indicate that using AGAIN, and some using WOULDBLOCK error code
-                    # We are going to check for both - if one of them - that's expected, means no incoming data, continue as normal
-                    # If we got different error code - something happened
                     if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
                         print('Reading error: {}'.format(str(e)))
-                    #sys.exit()
+
         thread = Thread(target=_target, args=[handler])
         thread.daemon = False
         thread.start()
