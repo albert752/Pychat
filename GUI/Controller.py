@@ -5,26 +5,56 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject
 from TCP.client import Client
 from TCP.server import Server
+from gi.repository import GLib
+from codes import *
 
 
 class Controller(object):
 
-    def __init__(self, model, view):
+    def __init__(self, model):
         self._model = model
-        self._view = view
+        self._client = None
+        self.username = "Joker"
 
-        self._client = Client("albert752")
-        self._client.start()
+        self._model.view.connect('send', self.send)
+        self._model.view.connect('destroy', Gtk.main_quit)
 
-        self._view.connect('send', self.send)
-        self._view.connect('destroy', Gtk.main_quit)
-
-        self._view.show_all()
+        self._model.view.show_all()
 
     def send(self, *args):
-        self._client.send_message(args[1])
+        args = args[1]
+        if args[0] == COMAND_SCAPE_CHAR:
+
+            command = args[1:].split(' ')
+            if len(command) > 1:
+                arguments = command[1]
+            command = command[0]
+
+            if command == "open":
+                try:
+                    self.username = arguments.split('@')[0]
+                    ip = arguments.split('@')[1].split(':')[0]
+                    port = int(arguments.split('@')[1].split(':')[1])
+
+                    self._client = Client(self.username, ip, port)
+                    self._client.start()
+                    self._client.listen(self.receive, 100)
+                except:
+                    self._model.add_err_output("Error while connecting to the server.")
+
+            elif command == "help":
+                self._model.add_output("Possible commands:\t:open (username)@(ip):(port)\n\t\tUsed to open connection")
+            else:
+                self._model.add_err_output("Command not found.")
+
+        else:
+            self._client.send_message(args)
+            self._model.add_message(self.username, args)
+
+    def receive(self, username, message):
+        self._model.add_message(username, message)
 
 
 if __name__ == '__main__':
-    Controller(Model(), View())
+    Controller(Model())
     Gtk.main()
