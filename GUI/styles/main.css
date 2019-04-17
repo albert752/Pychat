@@ -1,0 +1,24 @@
+box {
+    margin: 10px;
+}
+
+button {
+    margin-top: 4px;
+    margin-left: 4px;
+}
+
+button#send_button {
+    margin-right: 6px;
+}
+
+entry#message_entry{
+    margin-top: 4px;
+}
+
+menubar {
+    margin-bottom: 10px;
+}
+
+menuitem {
+    margin: 0px;
+}
