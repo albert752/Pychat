@@ -80,21 +80,20 @@ while True:
     read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list)
 
     for notified_socket in read_sockets:
-        unique = True
-        client_socket, client_address = server_socket.accept()
-        user = receive_message(client_socket)
 
         if notified_socket == server_socket:
 
+            client_socket, client_address = server_socket.accept()
+            user = receive_message(client_socket)
+
+            unique = True
             for sock in clients.values():
-                print(sock)
-                print("the user data is", end="")
-                print(user['data'])
                 if sock['data'] == user['data']:
                     unique = False
                     break
-            if not unique or (is_forb(user['data'])):
+            if not unique or is_forb(user['data']):
                 print("Refused new connection")
+                client_socket.send("Refused!  ".encode('utf-8'))
                 client_socket.close()
             else:
 

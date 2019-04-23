@@ -23,7 +23,6 @@ class View(Gtk.Window):
         self.create_conversation_textview()
         self.create_message_entry()
         self.create_send_button()
-        #self.create_top_menubar()
         self.create_toolbar()
         self.apply_styles()
 
@@ -158,34 +157,39 @@ class View(Gtk.Window):
             params = payload[1]
 
         GLib.idle_add(handler, params)
+        GLib.idle_add(self._set_format_text)
 
     def update_conversation_textview_message(self, payload):
-        self.textbuffer.insert(self.textbuffer.get_end_iter(), '\n'+payload[0] + ' > ')
-        start = self.textbuffer.get_iter_at_line_offset(self.textbuffer.get_line_count(), 0)
-        end = self.textbuffer.get_end_iter()
-
-        print("Line start" +str(start.get_line()))
-        print("Line end"+str(end.get_line()))
-        print("pos start"+str(start.get_line_index()))
-        print("pos end"+str(end.get_line_index()))
-
-        self.textbuffer.apply_tag(self.tag_bold, start, end)
-
+        self.textbuffer.insert(self.textbuffer.get_end_iter(), '\n*'+payload[0] + ' > *')
         self.textbuffer.insert(self.textbuffer.get_end_iter(), payload[1])
 
     def update_conversation_textview_stdout(self, payload):
-        self.textbuffer.insert(self.textbuffer.get_end_iter(), '\n[OK]: ' + payload)
+        self.textbuffer.insert(self.textbuffer.get_end_iter(), '\n_[OK]: ' + payload+'_')
 
     def update_conversation_textview_stderr(self, payload):
-        self.textbuffer.insert(self.textbuffer.get_end_iter(), '\n[ER]: ' + payload)
+        self.textbuffer.insert(self.textbuffer.get_end_iter(), '\n_[ER]: ' + payload+'_')
 
     def _set_format_text(self):
-        pass
+        self._set_style_text('*', self.tag_bold)
+        self._set_style_text('_', self.tag_italic)
+        self._set_style_text('-', self.tag_underline)
+        self._search('*', self.textbuffer.get_start_iter(), self.textbuffer.delete)
+        self._search('_', self.textbuffer.get_start_iter(), self.textbuffer.delete)
+        self._search('-', self.textbuffer.get_start_iter(), self.textbuffer.delete)
 
-    def _set_bold_text(self):
-        start = self.textbuffer.get_iter_at_mark(Gtk.TextBuffer.create_mark("*"))
-        end = self.textbuffer.get_end_iter()
-        self.textbuffer.apply_tag(self.tag_bold, start, end)
+    def _set_style_text(self, text, tag, start=None):
+        if start is None:
+            start = self.textbuffer.get_start_iter()
+        EOB = self.textbuffer.get_end_iter()
+
+        match = start.forward_search(text, 0, EOB)
+
+        if match is not None:
+            start, end = match
+            match = end.forward_search(text, 0, EOB)
+            _, end = match
+            self.textbuffer.apply_tag(tag, start, end)
+            self._set_style_text(text, tag, start=end)
 
     def on_search_clicked(self, widget):
         cursor_mark = self.textbuffer.get_insert()
@@ -193,13 +197,15 @@ class View(Gtk.Window):
         if start.get_offset() == self.textbuffer.get_char_count():
             start = self.textbuffer.get_start_iter()
 
-        self._search_and_mark(self.search_entry.get_text(), start)
+        def _handler(match_start, match_end):
+            self.textbuffer.apply_tag(self.tag_found, match_start, match_end)
+        self._search('Welcome', start, _handler)
 
-    def _search_and_mark(self, text, start):
+    def _search(self, text, start, handler):
         end = self.textbuffer.get_end_iter()
         match = start.forward_search(text, 0, end)
 
         if match is not None:
             match_start, match_end = match
-            self.textbuffer.apply_tag(self.tag_found, match_start, match_end)
-            self._search_and_mark(text, match_end)
+            handler(match_start, match_end)
+            self._search(text, match_end, handler)
