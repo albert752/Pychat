@@ -52,7 +52,7 @@ class View(Gtk.Window):
 
     def create_message_entry(self):
         self.message_entry = Gtk.Entry(name="message_entry")
-        self.message_entry.set_text(":open albert752@127.0.0.1:1234")
+        self.message_entry.set_text("")
         self.message_entry.connect("activate", self.on_enter_message_entry)
         self.grid.attach(self.message_entry, 0, 2, 5, 1)
 
@@ -67,7 +67,7 @@ class View(Gtk.Window):
         self.textview.set_editable(False)
 
         self.textbuffer = self.textview.get_buffer()
-        self.textbuffer.set_text("Welcome to Pychat!, enter help to see a list of available commands.")
+        self.textbuffer.set_text("Welcome to Pychat!\n\nEnter :help to see a list of available commands.\nExample :open albert752@127.0.0.1:1234")
         scrolledwindow.add(self.textview)
 
         self.tag_bold = self.textbuffer.create_tag("bold", weight=Pango.Weight.BOLD)
@@ -93,7 +93,7 @@ class View(Gtk.Window):
 
     def create_about_link_button(self):
         button = Gtk.LinkButton("https://github.com/albert752/Pychat", "© SevenFiveTwo - About", name="about")
-        self.grid.attach(button,  0, 3, 12, 1)
+        self.grid.attach(button,  0, 3, 1, 1)
         button.connect("clicked", self.about)
 
     # Widget handlers
@@ -168,10 +168,10 @@ class View(Gtk.Window):
         self.textbuffer.insert(self.textbuffer.get_end_iter(), payload[1])
 
     def update_conversation_textview_stdout(self, payload):
-        self.textbuffer.insert(self.textbuffer.get_end_iter(), '\n_[OK]: ' + payload+'_')
+        self.textbuffer.insert(self.textbuffer.get_end_iter(), '\n*[OK]:* ' + payload)
 
     def update_conversation_textview_stderr(self, payload):
-        self.textbuffer.insert(self.textbuffer.get_end_iter(), '\n_[ER]: ' + payload+'_')
+        self.textbuffer.insert(self.textbuffer.get_end_iter(), '\n*[ER]:* ' + payload)
 
     # Private support methods
     def _set_format_text(self):

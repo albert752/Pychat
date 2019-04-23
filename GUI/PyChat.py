@@ -67,7 +67,12 @@ class Controller(object):
                     self._model.add_err_output("Error while connecting to the server.")
 
             elif command == "help":
-                self._model.add_output("Possible commands:\t:open (username)@(ip):(port)\n\t\tUsed to open connection")
+                try:
+                    with open("./var/help.outpt", 'r') as fp:
+                        text=fp.read()
+                    self._model.add_output(text)
+                except:
+                    self._model.add_err_output("Error while reading help file")
             elif command == "server":
                 self._model.add_output(str(self._model.is_server))
             elif command == "close":
