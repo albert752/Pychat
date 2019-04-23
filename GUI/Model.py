@@ -5,9 +5,10 @@ import datetime
 
 class Model:
 
-    def __init__(self):
+    def __init__(self, is_server=False):
         self.chat_hist = []
         self._view = View()
+        self._is_server = is_server
 
     def add_message(self, usr, message):
         currentDT = datetime.datetime.now()
@@ -34,6 +35,13 @@ class Model:
     @property
     def state(self):
         return self.state
+
+    @property
+    def is_server(self):
+        return self._is_server
+
+    def set_is_server(self, value):
+        self._is_server = value
 
     def set_connection_state(self, state):
         self.connection_state = state

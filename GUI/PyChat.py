@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import gi
 from Model import Model
 gi.require_version('Gtk', '3.0')
@@ -5,9 +7,9 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject
 from TCP.client import Client
 from codes import *
-import json
-
-
+import sys
+from threading import Thread
+from server import server
 class Controller(object):
 
     def __init__(self, model):
@@ -23,6 +25,20 @@ class Controller(object):
         self._model.view.connect('destroy', Gtk.main_quit)
 
         self._model.view.show_all()
+        try:
+            if sys.argv[1] == "-s":
+                self._model.set_is_server(True)
+                def _target():
+                    try:
+                        s = server()
+                        s.run()
+                    except:
+                        self._model.set_is_server(False)
+                thread = Thread(target=_target)
+                thread.daemon = True
+                thread.start()
+        except:
+            pass
 
     def send(self, *args):
         """
@@ -52,7 +68,8 @@ class Controller(object):
 
             elif command == "help":
                 self._model.add_output("Possible commands:\t:open (username)@(ip):(port)\n\t\tUsed to open connection")
-
+            elif command == "server":
+                self._model.add_output(str(self._model.is_server))
             elif command == "close":
                 self.close()
             elif command == "save":
@@ -98,6 +115,7 @@ class Controller(object):
 
 
 if __name__ == '__main__':
+
     app = Controller(Model())
     Gtk.main()
     app.close()
