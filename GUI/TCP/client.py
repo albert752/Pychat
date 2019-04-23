@@ -5,6 +5,7 @@ from threading import Thread
 import time
 from codes import *
 
+
 class Client:
 
     def __init__(self, usr_name, remote="127.0.0.1", port=1234):
