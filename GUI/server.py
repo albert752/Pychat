@@ -1,12 +1,12 @@
 import socket
 import select
+import datetime
 from pprint import pprint as pp
 
 HEADER_LENGTH = 10
 
 IP = "127.0.0.1"
 PORT = 1234
-
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -16,12 +16,12 @@ server_socket.listen()
 
 sockets_list = [server_socket]
 clients = {server_socket: {'header': b'1         ', 'data': b'@'}}
+forbidden = [b'broadcast']
 
 print(f'Listening for connections on {IP}:{PORT}...')
 
 
 def receive_message(client_socket):
-
     try:
         message_header = client_socket.recv(HEADER_LENGTH)
         if not len(message_header):
@@ -37,6 +37,12 @@ def _compute_header(message):
     if isinstance(message, str):
         message = message.encode('utf-8')
     return {'header': f"{len(message):<{HEADER_LENGTH}}".encode('utf-8'), 'data': message}
+
+
+def is_forb(aux):
+    if aux in forbidden or aux[0] == '@':
+        return True
+    return False
 
 
 def send_message(message, src=None, dst='broadcast'):
@@ -74,19 +80,31 @@ while True:
     read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list)
 
     for notified_socket in read_sockets:
+        unique = True
+        client_socket, client_address = server_socket.accept()
+        user = receive_message(client_socket)
 
         if notified_socket == server_socket:
 
-            client_socket, client_address = server_socket.accept()
-            user = receive_message(client_socket)
-            if user is False:
-                continue
+            for sock in clients.values():
+                print(sock)
+                print("the user data is", end="")
+                print(user['data'])
+                if sock['data'] == user['data']:
+                    unique = False
+                    break
+            if not unique or (is_forb(user['data'])):
+                print("Refused new connection")
+                client_socket.close()
+            else:
 
-            sockets_list.append(client_socket)
-
-            clients[client_socket] = user
-            print('Accepted new connection from {}:{}, username: {}'.format(*client_address, user['data'].decode('utf-8')))
-            client_socket.send("Connected!".encode('utf-8'))
+                if user is False:
+                    continue
+                sockets_list.append(client_socket)
+                clients[client_socket] = user
+                print('Accepted new connection from {}:{}, username: {}'.format(*client_address,
+                                                                                user['data'].decode('utf-8')))
+                client_socket.send("Connected!".encode('utf-8'))
         else:
 
             message = receive_message(notified_socket)
@@ -110,14 +128,16 @@ while True:
                     print('Closed connection from: {}'.format(clients[notified_socket]['data'].decode('utf-8')))
                     sockets_list.remove(notified_socket)
                     del clients[notified_socket]
+                elif payload[1:] == "time":
+                    send_message(str(datetime.datetime.now()), src=clients[server_socket]['data'],
+                                 dst=clients[notified_socket]['data'])
                 else:
                     user_dst = payload[1:].split(' ', 1)[0]
                     print("It is a private message to " + user_dst)
-                    #user_message = payload[1:].split(' ', 1)[1]
+                    # user_message = payload[1:].split(' ', 1)[1]
                     send_message(payload, src=user['data'], dst=user_dst)
 
             else:
-
                 send_message(message['data'], src=user['data'])
 
     for notified_socket in exception_sockets:
