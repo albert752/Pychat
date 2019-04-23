@@ -53,12 +53,13 @@ class Client:
                 except IOError as e:
                     if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
                         print('Reading error: {}'.format(str(e)))
-            print("Thread ended")
+
         thread = Thread(target=_target, args=[handler])
         thread.daemon = True
         thread.start()
 
     def disconnect(self, handler):
+        print("disconnecting")
         self.connection_state = DISCONNECTED
         self.send_message("@close")
         handler(self.client_socket.recv(self.HEADER_LENGTH).decode('utf-8'))
