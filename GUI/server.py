@@ -1,5 +1,6 @@
 import socket
 import select
+from pprint import pprint as pp
 
 HEADER_LENGTH = 10
 
@@ -32,10 +33,34 @@ def receive_message(client_socket):
         return False
 
 
-def send_message(socket, payload):
-    message = payload.encode('utf-8')
-    message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
-    socket.send(clients[server_socket]['header'] + clients[server_socket]['data'] + message_header + message)
+def _compute_header(message):
+    if isinstance(message, str):
+        message = message.encode('utf-8')
+    return {'header': f"{len(message):<{HEADER_LENGTH}}".encode('utf-8'), 'data': message}
+
+
+def send_message(message, src=None, dst='broadcast'):
+    ''''
+    Send a message
+    :param message: List containing {'header': header, 'data': data} or just the string.
+    :param src: Dict containing [user_name_header, user_name] from witch the massage was sent.
+    :param dst: Dict containing [user_name_header, user_name] from witch message has to be sent.
+    '''
+    src = _compute_header(src)
+    message = _compute_header(message)
+
+    if dst == 'broadcast':
+
+        for client_socket in clients:
+            if client_socket != notified_socket and client_socket != server_socket:
+                print(f'Sent a message from {user["data"].decode("utf-8")} '
+                      f'to {clients[client_socket]["data"].decode("utf-8")}')
+                client_socket.send(src['header'] + src['data'] + message['header'] + message['data'])
+    else:
+        dst = _compute_header(dst)
+        for client_socket in clients:
+            if clients[client_socket] == dst:
+                client_socket.send(src['header'] + src['data'] + message['header'] + message['data'])
 
 
 def users_to_string():
@@ -61,7 +86,7 @@ while True:
 
             clients[client_socket] = user
             print('Accepted new connection from {}:{}, username: {}'.format(*client_address, user['data'].decode('utf-8')))
-
+            client_socket.send("Connected!".encode('utf-8'))
         else:
 
             message = receive_message(notified_socket)
@@ -75,17 +100,25 @@ while True:
             user = clients[notified_socket]
             print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
             payload = message["data"].decode("utf-8")
+
             if payload[0] == '@':
                 if payload[1:] == "list":
-                    send_message(notified_socket, users_to_string())
+                    send_message(users_to_string(), src=clients[server_socket]['data'],
+                                 dst=clients[notified_socket]['data'])
+                elif payload[1:] == "close":
+                    notified_socket.send("ByeBye  :)".encode('utf-8'))
+                    print('Closed connection from: {}'.format(clients[notified_socket]['data'].decode('utf-8')))
+                    sockets_list.remove(notified_socket)
+                    del clients[notified_socket]
                 else:
-                    pass
+                    user_dst = payload[1:].split(' ', 1)[0]
+                    print("It is a private message to " + user_dst)
+                    #user_message = payload[1:].split(' ', 1)[1]
+                    send_message(payload, src=user['data'], dst=user_dst)
+
             else:
-                for client_socket in clients:
-                    if client_socket != notified_socket and client_socket != server_socket:
-                            print(f'Sent a message from {user["data"].decode("utf-8")} '
-                                  f'to {clients[client_socket]["data"].decode("utf-8")}')
-                            client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
+
+                send_message(message['data'], src=user['data'])
 
     for notified_socket in exception_sockets:
         sockets_list.remove(notified_socket)

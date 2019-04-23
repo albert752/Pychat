@@ -35,13 +35,19 @@ class Controller(object):
                     port = int(arguments.split('@')[1].split(':')[1])
 
                     self._client = Client(self.username, ip, port)
-                    self._client.start()
-                    self._client.listen(self.receive, 100)
+                    self._client.start(self._model.add_output)
+                    self._client.listen(self.receive)
                 except:
                     self._model.add_err_output("Error while connecting to the server.")
 
             elif command == "help":
                 self._model.add_output("Possible commands:\t:open (username)@(ip):(port)\n\t\tUsed to open connection")
+
+            elif command == "close":
+                self._client.disconnect(self._model.add_output)
+                self._client = None
+                self.username = ""
+
             else:
                 self._model.add_err_output("Command not found.")
 

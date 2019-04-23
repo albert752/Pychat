@@ -147,7 +147,7 @@ class View(Gtk.Window):
         self.textbuffer.insert(self.textbuffer.get_end_iter(), '\n'+payload[0] + ' > ' + payload[1])
 
     def update_conversation_textview_stdout(self, payload):
-        print("This is the payload " + payload)
+        #print("This is the payload " + payload)
         self.textbuffer.insert(self.textbuffer.get_end_iter(), '\n[OK]: ' + payload)
 
     def update_conversation_textview_stderr(self, payload):
