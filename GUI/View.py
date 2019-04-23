@@ -11,6 +11,7 @@ WORKINGDIR = os.getcwd()
 class View(Gtk.Window):
     __gsignals__ = {
         'send': (GObject.SignalFlags.RUN_FIRST, None, (str,))
+
     }
 
     def __init__(self):
@@ -26,6 +27,7 @@ class View(Gtk.Window):
         self.create_toolbar()
         self.apply_styles()
 
+    # Styles
     def apply_styles(self):
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path('./styles/main.css')
@@ -34,6 +36,7 @@ class View(Gtk.Window):
             style_provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
+    # Creation of the layout and widgets
     def create_layout(self):
         self.grid = Gtk.Grid()
         self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -44,8 +47,6 @@ class View(Gtk.Window):
         send_button = Gtk.Button(label="Send!", name="send_button")
         send_button.connect("clicked", self.on_send_button_clicked)
         self.grid.attach(send_button, 5, 2, 1, 1)
-        #send_button.set_property("width-request", 1)
-        #send_button.set_property("height-request", 1)
 
     def create_message_entry(self):
         self.message_entry = Gtk.Entry(name="message_entry")
@@ -73,37 +74,22 @@ class View(Gtk.Window):
         self.tag_found = self.textbuffer.create_tag("found", background="yellow")
 
     def create_toolbar(self):
-        toolbar = Gtk.Toolbar()
+        toolbar = Gtk.Box(spacing=5)
         self.grid.attach(toolbar, 0, 0, 6, 1)
-
-        save_button = Gtk.ToolButton(label="Save")
-        toolbar.insert(save_button, 0)
-
-        save_button.connect("clicked", self.on_save_button_clicked)
-
-        toolbar.insert(Gtk.SeparatorToolItem(), 1)
 
         title_label = Gtk.Label()
         title_label.set_markup("<big>PyChat</big>")
-        #toolbar.insert(title_label, 2)
-
-        toolbar.insert(Gtk.SeparatorToolItem(), 3)
-
-        close_button = Gtk.ToolButton()
-        close_button.set_icon_name("edit-clear-symbolic")
-        close_button.connect("clicked", self.on_close_button_clicked)
-        toolbar.insert(close_button, 4)
-
-        toolbar.insert(Gtk.SeparatorToolItem(), 5)
+        toolbar.pack_start(title_label, True, True, 0)
 
         self.search_entry = Gtk.Entry(name="message_entry")
-        #toolbar.insert(self.search_entry, 6)
+        toolbar.pack_start(self.search_entry, True, True, 0)
+        self.search_entry.connect("activate", self.on_search_clicked)
 
-        button_search = Gtk.ToolButton()
-        button_search.set_icon_name("system-search-symbolic")
+        button_search = Gtk.Button(label="Serach")
         button_search.connect("clicked", self.on_search_clicked)
-        toolbar.insert(button_search, 7)
+        toolbar.pack_start(button_search, True, True, 0)
 
+    # Widget handlers
     def on_send_button_clicked(self, widget):
         self.emit('send', self.message_entry.get_text())
         self.message_entry.set_text("")
@@ -117,6 +103,16 @@ class View(Gtk.Window):
 
     def on_close_button_clicked(self, widget):
         pass
+
+    def on_search_clicked(self, widget):
+        cursor_mark = self.textbuffer.get_insert()
+        start = self.textbuffer.get_iter_at_mark(cursor_mark)
+        if start.get_offset() == self.textbuffer.get_char_count():
+            start = self.textbuffer.get_start_iter()
+
+        def _handler(match_start, match_end):
+            self.textbuffer.apply_tag(self.tag_found, match_start, match_end)
+        self._search(self.search_entry.get_text(), start, _handler)
 
     def about(self, widget, data=None):
 
@@ -144,6 +140,7 @@ class View(Gtk.Window):
         dialog.run()
         dialog.destroy()
 
+    # Updating methods
     def update(self, payload):
 
         if payload[0] == NEW_MESSAGE:
@@ -169,6 +166,7 @@ class View(Gtk.Window):
     def update_conversation_textview_stderr(self, payload):
         self.textbuffer.insert(self.textbuffer.get_end_iter(), '\n_[ER]: ' + payload+'_')
 
+    # Private support methods
     def _set_format_text(self):
         self._set_style_text('*', self.tag_bold)
         self._set_style_text('_', self.tag_italic)
@@ -190,16 +188,6 @@ class View(Gtk.Window):
             _, end = match
             self.textbuffer.apply_tag(tag, start, end)
             self._set_style_text(text, tag, start=end)
-
-    def on_search_clicked(self, widget):
-        cursor_mark = self.textbuffer.get_insert()
-        start = self.textbuffer.get_iter_at_mark(cursor_mark)
-        if start.get_offset() == self.textbuffer.get_char_count():
-            start = self.textbuffer.get_start_iter()
-
-        def _handler(match_start, match_end):
-            self.textbuffer.apply_tag(self.tag_found, match_start, match_end)
-        self._search('Welcome', start, _handler)
 
     def _search(self, text, start, handler):
         end = self.textbuffer.get_end_iter()

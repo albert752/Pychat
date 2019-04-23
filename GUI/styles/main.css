@@ -3,12 +3,18 @@ box {
 }
 
 button {
-    margin-top: 4px;
-    margin-left: 4px;
+
 }
 
 button#send_button {
+    margin-top: 4px;
+    margin-left: 4px;
     margin-right: 6px;
+}
+
+label{
+    margin-left: 20px;
+    margin-right: 20px;
 }
 
 entry#message_entry{

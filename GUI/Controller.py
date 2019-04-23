@@ -58,7 +58,7 @@ class Controller(object):
     def receive(self, username, message):
         self._model.add_message(username, message)
 
-    def close(self, arg):
+    def close(self):
         if self._client is not None:
             self._client.disconnect(self._model.add_output)
 
