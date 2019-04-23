@@ -2,12 +2,12 @@ from View import View
 from codes import *
 import datetime
 
+
 class Model:
 
     def __init__(self):
         self.chat_hist = []
         self._view = View()
-        self.connection_state = 0
 
     def add_message(self, usr, message):
         currentDT = datetime.datetime.now()
@@ -37,6 +37,7 @@ class Model:
 
     def set_connection_state(self, state):
         self.connection_state = state
+
 
 if __name__=='__main__':
     model = Model()

@@ -25,6 +25,8 @@ class View(Gtk.Window):
         self.create_message_entry()
         self.create_send_button()
         self.create_toolbar()
+        self.create_about_link_button()
+
         self.apply_styles()
 
     # Styles
@@ -89,6 +91,11 @@ class View(Gtk.Window):
         button_search.connect("clicked", self.on_search_clicked)
         toolbar.pack_start(button_search, True, True, 0)
 
+    def create_about_link_button(self):
+        button = Gtk.LinkButton("https://github.com/albert752/Pychat", "© SevenFiveTwo - About", name="about")
+        self.grid.attach(button,  0, 3, 12, 1)
+        button.connect("clicked", self.about)
+
     # Widget handlers
     def on_send_button_clicked(self, widget):
         self.emit('send', self.message_entry.get_text())
@@ -116,19 +123,19 @@ class View(Gtk.Window):
 
     def about(self, widget, data=None):
 
-        APP_TITLE = "PYCHAT"
-        APP_LICENCE = "MIT"
-        APP_COMMENTS = "hello"
-        APP_COPYRIGHT = "..MIT"
-        HOME_PAGE = "Hello"
-        APP_AUTHORS = "me"
+        APP_TITLE = "PyChat"
+        APP_LICENCE = "MIT - More details at https://github.com/albert752/Pychat/blob/master/LICENSE"
+        APP_COMMENTS = "A simple but powerful Py(thon) Chat"
+        APP_COPYRIGHT = "albert752, jplanas98 and mefiso"
+        HOME_PAGE = "https://github.com/albert752/Pychat/b"
+        APP_AUTHORS = ["albert752","jplanas98","mefiso"]
 
         about_dialog = Gtk.AboutDialog()
         dialog = about_dialog
         dialog.set_name(APP_TITLE)
 
         try:
-            data = open('/usr/share/doc/nativecam/copyright', 'r').read()
+            data = open('./LICENSE', 'r').read()
             dialog.set_license(data)
         except:
             dialog.set_license(APP_LICENCE)

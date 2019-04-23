@@ -11,6 +11,10 @@ import json
 class Controller(object):
 
     def __init__(self, model):
+        """
+        Initialites the whole app
+        :param model: Instance of the desired model
+        """
         self._model = model
         self._client = None
         self.username = ""
@@ -21,6 +25,11 @@ class Controller(object):
         self._model.view.show_all()
 
     def send(self, *args):
+        """
+        Parses the typed command typed on the send entry.
+        :param args:
+        :return:
+        """
         args = args[1]
         if args[0] == COMAND_SCAPE_CHAR:
 
@@ -45,16 +54,9 @@ class Controller(object):
                 self._model.add_output("Possible commands:\t:open (username)@(ip):(port)\n\t\tUsed to open connection")
 
             elif command == "close":
-                self._client.disconnect(self._model.add_output)
-                self._client = None
-                self.username = ""
+                self.close()
             elif command == "save":
-                try:
-                    with open(arguments, 'w') as fp:
-                        fp.write(self._model.report_messages())
-                    self._model.add_output("Conversation saved succesfuly")
-                except:
-                    self._model.add_err_output("Error while saving the conversation")
+                self._save_conver(path=arguments)
             else:
                 self._model.add_err_output("Command not found.")
 
@@ -63,11 +65,36 @@ class Controller(object):
             self._model.add_message(self.username, args)
 
     def receive(self, username, message):
+        """
+        Saves the received message to the model
+        :param username: Str with the uname of the src
+        :param message: Str with the actual message
+        :return:
+        """
         self._model.add_message(username, message)
 
+    def _save_conver(self, path="./history.txt"):
+        """
+        Saves the conversation to the given path. It will overwrite!
+        :param path: str cintaining the full or relative path to the file.
+        :return:
+        """
+        try:
+            with open(path, 'w') as fp:
+                fp.write(self._model.report_messages())
+            self._model.add_output("Conversation saved succesfuly")
+        except:
+            self._model.add_err_output("Error while saving the conversation")
+
     def close(self):
+        """
+        If open, closes the TCP connection and clears its variables.
+        :return:
+        """
         if self._client is not None:
             self._client.disconnect(self._model.add_output)
+            self._client = None
+            self.username = ""
 
 
 if __name__ == '__main__':

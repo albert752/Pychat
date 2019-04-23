@@ -3,7 +3,7 @@ box {
 }
 
 button {
-
+    margin: 2px
 }
 
 button#send_button {
@@ -17,6 +17,9 @@ label{
     margin-right: 20px;
 }
 
+text{
+    background: #F6F5F4
+}
 entry#message_entry{
     margin-top: 4px;
 }
