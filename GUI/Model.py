@@ -8,12 +8,11 @@ class Model:
         self.chat_hist = []
         self._view = View()
         self.connection_state = 0
-        self.chat = ""
+
     def add_message(self, usr, message):
         currentDT = datetime.datetime.now()
         date_usr = " ".join([currentDT.strftime("[%d/%m %H:%M]"),usr])
         self.chat_hist.append([date_usr, message])
-        self.chat = self.report_messages()
         self._view.update([NEW_MESSAGE, [date_usr, message]])
 
     def add_output(self, text):

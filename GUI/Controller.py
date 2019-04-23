@@ -5,6 +5,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject
 from TCP.client import Client
 from codes import *
+import json
 
 
 class Controller(object):
@@ -47,7 +48,13 @@ class Controller(object):
                 self._client.disconnect(self._model.add_output)
                 self._client = None
                 self.username = ""
-
+            elif command == "save":
+                try:
+                    with open(arguments, 'w') as fp:
+                        fp.write(self._model.report_messages())
+                    self._model.add_output("Conversation saved succesfuly")
+                except:
+                    self._model.add_err_output("Error while saving the conversation")
             else:
                 self._model.add_err_output("Command not found.")
 
