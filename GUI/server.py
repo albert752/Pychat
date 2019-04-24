@@ -19,10 +19,9 @@ class server:
 
         self.sockets_list = [self.server_socket]
         self.clients = {self.server_socket: {'header': b'1         ', 'data': b'@'}}
-        self.forbidden = [b'broadcast']
+        self.forbidden = [b'broadcast', b'list', b'close', b'time']
 
         print(f'Listening for connections on {self.IP}:{self.PORT}...')
-
 
     def receive_message(self, client_socket):
         try:
@@ -35,12 +34,10 @@ class server:
         except:
             return False
 
-
     def _compute_header(self, message):
         if isinstance(message, str):
             message = message.encode('utf-8')
         return {'header': f"{len(message):<{self.HEADER_LENGTH}}".encode('utf-8'), 'data': message}
-
 
     def is_forb(self, aux):
         if aux in self.forbidden or aux[0] == '@':
@@ -70,7 +67,7 @@ class server:
             for client_socket in self.clients:
                 if self.clients[client_socket] == dst:
                     client_socket.send(src['header'] + src['data'] + message['header'] + message['data'])
-
+                    break
 
     def users_to_string(self):
         message = "Registered users: "
@@ -125,15 +122,18 @@ class server:
                         if payload[1:] == "list":
                             self.send_message(self.users_to_string(), src=self.clients[self.server_socket]['data'],
                                          dst=self.clients[self.notified_socket]['data'])
+
                         elif payload[1:] == "close":
                             self.notified_socket.send("ByeBye  :)".encode('utf-8'))
                             print('Closed connection from: {}'.format(self.clients[self.notified_socket]['data'].decode('utf-8')))
                             self.sockets_list.remove(self.notified_socket)
                             del self.clients[self.notified_socket]
 
+
                         elif payload[1:] == "time":
                             self.send_message(str(datetime.datetime.now()), src=self.clients[self.server_socket]['data'],
                                          dst=self.clients[self.notified_socket]['data'])
+
                         else:
                             self.user_dst = payload[1:].split(' ', 1)[0]
                             print("It is a private message to " + self.user_dst)
@@ -145,6 +145,7 @@ class server:
             for self.notified_socket in exception_sockets:
                 self.sockets_list.remove(self.notified_socket)
                 del self.clients[self.notified_socket]
+
 
 if __name__ == '__main__':
     s = server()

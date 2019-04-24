@@ -18,8 +18,11 @@
 #===============================================================================
 
 set -o nounset                              # Treat unset variables as an error
-mkdir /usr/share/PyChat
+
 path=/usr/share/PyChat
+rm -r $path 
+mkdir $path 
+
 cp -r ./styles $path/styles
 cp -r ./TCP $path/TCP
 cp -r ./var $path/var

@@ -11,7 +11,6 @@ WORKINGDIR = os.getcwd()
 class View(Gtk.Window):
     __gsignals__ = {
         'send': (GObject.SignalFlags.RUN_FIRST, None, (str,))
-
     }
 
     def __init__(self):
@@ -32,7 +31,7 @@ class View(Gtk.Window):
     # Styles
     def apply_styles(self):
         style_provider = Gtk.CssProvider()
-        style_provider.load_from_path('./styles/main.css')
+        style_provider.load_from_path('/usr/share/PyChat/styles/main.css')
         Gtk.StyleContext.add_provider_for_screen(
             Gdk.Screen.get_default(),
             style_provider,
@@ -127,7 +126,7 @@ class View(Gtk.Window):
         APP_LICENCE = "MIT - More details at https://github.com/albert752/Pychat/blob/master/LICENSE"
         APP_COMMENTS = "A simple but powerful Py(thon) Chat"
         APP_COPYRIGHT = "albert752, jplanas98 and mefiso"
-        HOME_PAGE = "https://github.com/albert752/Pychat/b"
+        HOME_PAGE = "https://github.com/albert752/Pychat/"
         APP_AUTHORS = ["albert752","jplanas98","mefiso"]
 
         about_dialog = Gtk.AboutDialog()
@@ -135,7 +134,7 @@ class View(Gtk.Window):
         dialog.set_name(APP_TITLE)
 
         try:
-            data = open('./LICENSE', 'r').read()
+            data = open('/usr/share/PyChat/LICENSE', 'r').read()
             dialog.set_license(data)
         except:
             dialog.set_license(APP_LICENCE)

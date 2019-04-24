@@ -10,6 +10,8 @@ from codes import *
 import sys
 from threading import Thread
 from server import server
+
+
 class Controller(object):
 
     def __init__(self, model):
@@ -38,7 +40,7 @@ class Controller(object):
                 thread.daemon = True
                 thread.start()
         except:
-            pass
+            print("Server could not be lauched")
 
     def send(self, *args):
         """
@@ -62,13 +64,13 @@ class Controller(object):
 
                     self._client = Client(self.username, ip, port)
                     self._client.start(self._model.add_output)
-                    self._client.listen(self.receive)
+                    self._client.listen(self.receive, self._model.add_output)
                 except:
                     self._model.add_err_output("Error while connecting to the server.")
 
             elif command == "help":
                 try:
-                    with open("./var/help.outpt", 'r') as fp:
+                    with open("/usr/share/PyChat/var/help.outpt", 'r') as fp:
                         text=fp.read()
                     self._model.add_output(text)
                 except:

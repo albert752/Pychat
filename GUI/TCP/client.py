@@ -32,8 +32,8 @@ class Client:
         message_header = f"{len(message):<{self.HEADER_LENGTH}}".encode('utf-8')
         self.client_socket.send(message_header + message)
 
-    def listen(self, handler):
-        def _target(hand):
+    def listen(self, handler, close_handler):
+        def _target(hand, close_handler):
             while self.connection_state == CONNECTED:
                 try:
                     while True:
@@ -41,29 +41,29 @@ class Client:
                         if not len(username_header):
                             print('Connection closed by the server')
                             sys.exit()
-
-                        username_length = int(username_header.decode('utf-8').strip())
-                        username = self.client_socket.recv(username_length).decode('utf-8')
-
-                        message_header = self.client_socket.recv(self.HEADER_LENGTH)
-                        message_length = int(message_header.decode('utf-8').strip())
-                        message = self.client_socket.recv(message_length).decode('utf-8')
-                        if hand(username, message) == 'close':
+                        if username_header == b"ByeBye  :)":
+                            close_handler(username_header.decode('utf-8'))
                             break
+                        else:
+                            username_length = int(username_header.decode('utf-8').strip())
+                            username = self.client_socket.recv(username_length).decode('utf-8')
+
+                            message_header = self.client_socket.recv(self.HEADER_LENGTH)
+                            message_length = int(message_header.decode('utf-8').strip())
+                            message = self.client_socket.recv(message_length).decode('utf-8')
+                            hand(username, message)
 
                 except IOError as e:
                     if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
                         print('Reading error: {}'.format(str(e)))
 
-        thread = Thread(target=_target, args=[handler])
+        thread = Thread(target=_target, args=[handler, close_handler])
         thread.daemon = True
         thread.start()
 
     def disconnect(self, handler):
-        print("disconnecting")
         self.connection_state = DISCONNECTED
         self.send_message("@close")
-        handler(self.client_socket.recv(self.HEADER_LENGTH).decode('utf-8'))
 
 if __name__ == '__main__':
     print("=== Test execution of TCP client ===")
