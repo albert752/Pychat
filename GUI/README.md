@@ -1,13 +1,2 @@
-# MDV Diagram
-
-View        Model       Controller
-||          ||          ||
-||          ||          ||
-||          ||          ||
-Send ==================>||
-||          ||          ||
-||          ||          ||
-||          Updates <===Message gets sent
-||          the model    ||
-Updates
-The view
+# GUI VERSION
+Here you'll find the GTK3 GUI version.
