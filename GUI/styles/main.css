@@ -1,0 +1,33 @@
+box {
+    margin: 10px;
+}
+
+button {
+    margin: 2px
+}
+
+button#send_button {
+    margin-top: 4px;
+    margin-left: 4px;
+    margin-right: 6px;
+}
+
+label{
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+text{
+    background: #F6F5F4
+}
+entry#message_entry{
+    margin-top: 4px;
+}
+
+menubar {
+    margin-bottom: 10px;
+}
+
+menuitem {
+    margin: 0px;
+}
