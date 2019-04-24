@@ -60,10 +60,6 @@ Please read **TBD** for details on our code of conduct, and the process for subm
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
-
+## Slides
+[here](https://docs.google.com/presentation/d/1Nx7oOcdL8NFE84qBNwMy38_txTaFQa-dFwLBDoIlpVw/edit?usp=sharing)
 
