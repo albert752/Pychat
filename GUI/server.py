@@ -24,6 +24,11 @@ class server:
         print(f'Listening for connections on {self.IP}:{self.PORT}...')
 
     def receive_message(self, client_socket):
+        """
+        Returns the dict containing header and data of the received message.
+        :param client_socket: socket from where to extract the message
+        :return: dict or False is exeception
+        """
         try:
             message_header = client_socket.recv(self.HEADER_LENGTH)
             if not len(message_header):
@@ -35,11 +40,21 @@ class server:
             return False
 
     def _compute_header(self, message):
+        """
+        Given a string, returns the dict, data header.
+        :param message: dict
+        :return:
+        """
         if isinstance(message, str):
             message = message.encode('utf-8')
         return {'header': f"{len(message):<{self.HEADER_LENGTH}}".encode('utf-8'), 'data': message}
 
     def is_forb(self, aux):
+        """
+        Checks if the username is forbiden.
+        :param aux: string
+        :return: boolean True if is invalid
+        """
         if aux in self.forbidden or aux[0] == '@':
             return True
         return False
@@ -70,12 +85,20 @@ class server:
                     break
 
     def users_to_string(self):
+        """
+        Creates a string containing all the connected usernames.
+        :return: string
+        """
         message = "Registered users: "
         for client in self.clients.values():
             message += '\t\n' + client['data'].decode('utf-8')
         return message
 
     def run(self):
+        """
+        Main server loop. Handles all the operations.
+        :return:
+        """
         while True:
             read_sockets, _, exception_sockets = select.select(self.sockets_list, [], self.sockets_list)
 

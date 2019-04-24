@@ -17,6 +17,11 @@ class Client:
         self.connection_state = DISCONNECTED
 
     def start(self, handler):
+        """
+        Starts the connection with the server and tries to register the user
+        :param handler: executed with the server greeter as parameter
+        :return:
+        """
         self.client_socket.connect((self.ip, self.port))
         self.client_socket.setblocking(True)
 
@@ -28,11 +33,23 @@ class Client:
         handler(greeter.decode('utf-8'))
 
     def send_message(self, payload):
+        """
+        Sends a message containing the string payload with the apropiate header
+        to the connected server.
+        :param payload: string as message
+        :return:
+        """
         message = payload.encode('utf-8')
         message_header = f"{len(message):<{self.HEADER_LENGTH}}".encode('utf-8')
         self.client_socket.send(message_header + message)
 
     def listen(self, handler, close_handler):
+        """
+        Listens to incoming messages and when received, executes the apropiate handler. Runs in a separeted daemon thread
+        :param handler: function to be executed with prameter user ad message when a regular message arrives
+        :param close_handler: function to be executed with parameters message when a bye bye arrives.
+        :return:
+        """
         def _target(hand, close_handler):
             while self.connection_state == CONNECTED:
                 try:
@@ -62,8 +79,14 @@ class Client:
         thread.start()
 
     def disconnect(self, handler):
+        """
+        Terminates teh connection
+        :param handler: Deprecated
+        :return:
+        """
         self.connection_state = DISCONNECTED
         self.send_message("@close")
+
 
 if __name__ == '__main__':
     print("=== Test execution of TCP client ===")

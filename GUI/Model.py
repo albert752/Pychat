@@ -9,20 +9,43 @@ class Model:
         self.chat_hist = []
         self._view = View()
         self._is_server = is_server
+        self.log = []
 
     def add_message(self, usr, message):
+        """
+        Notifies the view and adds a message to the database
+        :param usr: username
+        :param message: actual message
+        :return:
+        """
         currentDT = datetime.datetime.now()
         date_usr = " ".join([currentDT.strftime("[%d/%m %H:%M]"),usr])
         self.chat_hist.append([date_usr, message])
         self._view.update([NEW_MESSAGE, [date_usr, message]])
 
     def add_output(self, text):
+        """
+        Adds a std output to the view.
+        :param text: str
+        :return:
+        """
+        self.log.append(text)
         self._view.update([STD_OUT, text])
 
     def add_err_output(self, text):
+        """
+        Adds a stderr output to the view.
+        :param text:
+        :return:
+        """
+        self.log.append(text)
         self._view.update([STD_ERR, text])
 
     def report_messages(self, ):
+        """
+        Returns a string containing all chat history.
+        :return: str
+        """
         text_aux = []
         for x in self.chat_hist:
             text_aux.append("> ".join([x[0],x[1]]))
